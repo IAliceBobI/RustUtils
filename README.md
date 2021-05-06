@@ -1,5 +1,7 @@
 # RustUtils
 
+## Dependency
+my-macro = { git = "https://github.com/chenwei767/RustUtils.git", branch = "master" }
 
 ## Usage
 ```rust
