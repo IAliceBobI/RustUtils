@@ -5,6 +5,7 @@ my-macro = { git = "https://github.com/chenwei767/RustUtils.git", branch = "mast
 
 ## Usage
 ```rust
+use my_macro::*;
 
 #[test]
 fn create_struct_for_test() {
