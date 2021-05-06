@@ -4,11 +4,17 @@ use super::*;
 
 #[test]
 fn create_struct_for_test() {
-	create_struct_for_test!{pub struct AAA { 22 } };
+	create_struct_for_test! {pub struct AAA { String, 22 } }
 	let mut obj = AAA::default();
 	obj.i0 = String::from("bbbb");
 	obj.i10 = String::from("bbbb");
 	obj.i21 = String::from("bbbb");
+
+	create_struct_for_test! {pub struct BBB { i32, 22 } }
+	let mut obj = BBB::default();
+	obj.i0 = 1;
+	obj.i10 = 2;
+	obj.i21 = 3;
 }
 
 #[test]

@@ -8,18 +8,18 @@ include!("../res/ident_repeat.rs");
 
 #[macro_export]
 macro_rules! create_struct_for_test {
-	(@repeat (($($nums:tt),* $(,)*), $name:tt) -> ())=> {
+	(@repeat (($($nums:tt),* $(,)*),  $t:ty, $name:tt) -> ())=> {
 		#[derive(Debug, Default)]
 		pub struct $name {
-			$( $nums: String, )*
+			$( $nums: $t, )*
 		}
 	};
 
 	// TODO: add visibility https://danielkeep.github.io/tlborm/book/pat-visibility.html
 	// TODO: implement get/set https://github.com/dtolnay/paste
 
-	(pub struct $name:tt { $n:tt }) => {
-		ident_repeat!($n, create_struct_for_test, $name)
+	(pub struct $name:tt { $t:ty, $n:tt }) => {
+		ident_repeat!($n, create_struct_for_test, $t, $name)
 	}
 }
 
