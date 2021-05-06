@@ -1,4 +1,4 @@
-#[macro_export] macro_rules! macro_repeat {
+#[macro_export] macro_rules! num_repeat {
 (0, $callback:ident, $($args:tt)*) => {$callback!(@repeat ((,), $($args)*) -> ())};
 (1, $callback:ident, $($args:tt)*) => {$callback!(@repeat ((0,), $($args)*) -> ())};
 (2, $callback:ident, $($args:tt)*) => {$callback!(@repeat ((0,1,), $($args)*) -> ())};

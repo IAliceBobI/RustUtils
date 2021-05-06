@@ -1,10 +1,27 @@
 #![recursion_limit = "1024"]
 
-use paste::paste;
-
 mod tests;
+mod gen_code;
 
-include!("../res/macro_repeat.rs");
+include!("../res/num_repeat.rs");
+include!("../res/ident_repeat.rs");
+
+#[macro_export]
+macro_rules! create_struct_for_test {
+	(@repeat (($($nums:tt),* $(,)*), $name:tt) -> ())=> {
+		#[derive(Debug, Default)]
+		pub struct $name {
+			$( $nums: String, )*
+		}
+	};
+
+	// TODO: add visibility https://danielkeep.github.io/tlborm/book/pat-visibility.html
+	// TODO: implement get/set https://github.com/dtolnay/paste
+
+	(pub struct $name:tt { $n:tt }) => {
+		ident_repeat!($n, create_struct_for_test, $name)
+	}
+}
 
 #[macro_export]
 macro_rules! init_array {
@@ -22,7 +39,7 @@ macro_rules! init_array {
 	[$e:expr; $n:tt] => {
 		{
 			let e = $e;
-			macro_repeat!($n, init_array, e.clone())
+			num_repeat!($n, init_array, e.clone())
 		}
 	};
 }
