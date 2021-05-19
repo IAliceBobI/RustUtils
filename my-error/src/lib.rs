@@ -149,7 +149,7 @@ impl<T> MyResultTrait<T> for Result<T> {
 
 impl<T> MyResultTrait<T> for Option<T> {
 	fn c(self, info: ErrorInfo) -> Result<T> {
-		self.ok_or_else(|| MyError::new(info, None, None).into())
+		self.ok_or_else(|| MyError::new(info, Some(anyhow::anyhow!("None")), None))
 	}
 }
 
