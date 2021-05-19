@@ -111,14 +111,17 @@ impl MyError {
 	fn cause(&self) -> Option<&MyError> {
 		self.cause.as_deref()
 	}
-	pub fn get_root_error(&self) -> Option<&anyhow::Error> {
+	pub fn get_root_error(&self) -> &anyhow::Error {
+		lazy_static! {
+			static ref DEFAULT_ERROR: anyhow::Error = anyhow::anyhow!("Sorry");
+		}
 		let mut cause = self.cause();
 		let mut err = &self.err;
 		while let Some(e) = cause {
 			cause = e.cause();
 			err = &e.err;
 		}
-		err.as_ref()
+		err.as_ref().unwrap_or(&DEFAULT_ERROR)
 	}
 }
 

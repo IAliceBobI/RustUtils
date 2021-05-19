@@ -17,7 +17,7 @@ fn xxx() -> Result<i32> {
 fn demo() {
     if let Err(e) = xxx() {
         println!("{}", e);
-        match e.get_root_error().unwrap().downcast_ref::<std::io::Error>() {
+        match e.get_root_error().downcast_ref::<std::io::Error>() {
             Some(e) => {
                 println!("this is an io error. {}", e);
             }
@@ -50,7 +50,7 @@ fn xxx2() -> Result<i32> {
 fn demo4() {
     if let Err(e) = xxx2() {
         println!("{}", e);
-        match e.get_root_error().unwrap().downcast_ref::<BizError>() {
+        match e.get_root_error().downcast_ref::<BizError>() {
             Some(e) => {
                 println!("this is BizError {}", e);
             }
