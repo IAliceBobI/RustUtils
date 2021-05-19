@@ -7,3 +7,7 @@ edition = "2018"
 lazy_static = "1.4.0"
 anyhow = "1.0"
 time = "0.2.23"
+
+[dev-dependencies]
+thiserror = "1.0"
+

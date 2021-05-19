@@ -7,23 +7,17 @@ mod utils;
 
 // ---------- error info -------------
 
-/// Contains an error and the source info where this error was generated.
 #[derive(Debug)]
 pub struct ErrorInfo {
-	pub err: anyhow::Error,
-	pub file: String,
+	pub comment: Option<String>,
+	pub file: &'static str,
 	pub line: u32,
 	pub column: u32,
 }
 
 impl ErrorInfo {
-	pub fn new(err: anyhow::Error, file: &str, line: u32, column: u32) -> Self {
-		ErrorInfo {
-			err,
-			file: file.to_owned(),
-			line,
-			column,
-		}
+	pub fn new(comment: Option<String>, file: &'static str, line: u32, column: u32) -> Self {
+		Self { comment, file, line, column }
 	}
 }
 
@@ -32,7 +26,7 @@ impl Display for ErrorInfo {
 		write!(
 			f,
 			"{} At: {} Line: {} Column: {}",
-			self.err, self.file, self.line, self.column
+			self.comment.clone().unwrap_or_default(), self.file, self.line, self.column
 		)
 	}
 }
@@ -42,6 +36,7 @@ impl Display for ErrorInfo {
 #[derive(Debug)]
 pub struct MyError {
 	info: ErrorInfo,
+	err: Option<anyhow::Error>,
 	cause: Option<Box<MyError>>,
 }
 
@@ -58,6 +53,9 @@ impl MyError {
 	fn stringify_chain(&self) -> String {
 		let mut res = "\nError: ".to_owned();
 		res.push_str(&self.get_top_info().to_string());
+		if let Some(err) = &self.err {
+			res.push_str(&err.to_string())
+		}
 		let mut e = self.cause();
 		let mut indent_num = 0;
 		while let Some(c) = e {
@@ -68,6 +66,10 @@ impl MyError {
 			res.push_str(&prefix);
 			res.push_str("Caused By: ");
 			res.push_str(&c.get_top_info().to_string().replace("\n", &prefix));
+			if let Some(err) = &c.err {
+				res.push_str(" Err: ");
+				res.push_str(&err.to_string())
+			}
 			indent_num += 1;
 			e = c.cause();
 		}
@@ -108,14 +110,14 @@ impl MyError {
 	fn cause(&self) -> Option<&MyError> {
 		self.cause.as_deref()
 	}
-	pub fn get_root_error(&self) -> &anyhow::Error {
+	pub fn get_root_error(&self) -> Option<&anyhow::Error> {
 		let mut cause = self.cause();
-		let mut err = &self.info.err;
+		let mut err = &self.err;
 		while let Some(e) = cause {
 			cause = e.cause();
-			err = &e.info.err;
+			err = &e.err;
 		}
-		err
+		err.as_ref()
 	}
 }
 
@@ -126,8 +128,8 @@ impl Display for MyError {
 }
 
 impl MyError {
-	pub fn new(info: ErrorInfo, cause: Option<Box<MyError>>) -> Self {
-		Self { info, cause }
+	pub fn new(info: ErrorInfo, err: Option<anyhow::Error>, cause: Option<Box<MyError>>) -> Self {
+		Self { info, err, cause }
 	}
 }
 
@@ -141,27 +143,18 @@ pub trait MyResultTrait<T> {
 
 impl<T> MyResultTrait<T> for Result<T> {
 	fn c(self, info: ErrorInfo) -> Result<T> {
-		self.map_err(|e| MyError::new(info, Some(Box::new(e))).into())
+		self.map_err(|e| MyError::new(info, None, Some(Box::new(e))))
 	}
 }
 
 impl<T> MyResultTrait<T> for Option<T> {
 	fn c(self, info: ErrorInfo) -> Result<T> {
-		self.ok_or_else(|| MyError::new(info, None).into())
+		self.ok_or_else(|| MyError::new(info, None, None).into())
 	}
 }
 
 impl<T> MyResultTrait<T> for anyhow::Result<T> {
 	fn c(self, info: ErrorInfo) -> Result<T> {
-		self.map_err(|e| {
-			MyError::new(
-				info,
-				Some(Box::new(MyError::new(
-					ErrorInfo::new(e, "_.rs", 0, 0),
-					None,
-				))),
-			)
-			.into()
-		})
+		self.map_err(|e| { MyError::new(info, Some(e), None) })
 	}
 }

@@ -13,13 +13,16 @@ macro_rules! pnk {
 #[macro_export]
 macro_rules! d {
 	($err: expr) => {{
-		$crate::ErrorInfo::new(anyhow::anyhow!($err), file!(), line!(), column!())
+		$crate::ErrorInfo::new(Some($err.to_owned()), file!(), line!(), column!())
 	}};
-	(@$err: expr) => {{
-		$crate::d!(format!("{:?}", $err))
+	($err: expr, $($args:expr),* $(,)*) => {{
+		$crate::d!(format!($err, $err))
 	}};
+	(@$msg: expr) => {
+		$crate::d!(format!("{:#?}", $msg))
+	};
 	() => {{
-		$crate::d!("...")
+		$crate::ErrorInfo::new(None, file!(), line!(), column!())
 	}};
 }
 
@@ -39,13 +42,10 @@ macro_rules! ge {
 		$crate::ge!(format!($msg, $($args)*))
 	};
 	($msg: expr) => {{
-		$crate::MyError::new($crate::d!($msg), None)
+		$crate::MyError::new($crate::d!(), Some(anyhow::anyhow!($msg)), None)
 	}};
 	(@$msg: expr) => {
 		$crate::ge!(format!("{:#?}", $msg))
-	};
-	() => {
-		$crate::ge!("...")
 	};
 }
 
@@ -78,8 +78,7 @@ pub fn gen_datetime(ts: i64) -> String {
 
 #[inline(always)]
 pub fn get_pidns(pid: u32) -> Result<String> {
-	std::fs::read_link(format!("/proc/{}/ns/pid", pid))
-		.map_err(|e| anyhow::anyhow!(e))
+	se!(std::fs::read_link(format!("/proc/{}/ns/pid", pid)))	
 		.c(crate::d!())
 		.map(|p| {
 			p.to_string_lossy()

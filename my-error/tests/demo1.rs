@@ -1,4 +1,5 @@
 use my_error::{bail, d, ge, pnk, se, MyResultTrait, Result};
+use thiserror::Error;
 
 fn xxx() -> Result<i32> {
     let a = std::result::Result::Err(std::io::Error::from_raw_os_error(33));
@@ -16,9 +17,42 @@ fn xxx() -> Result<i32> {
 fn demo() {
     if let Err(e) = xxx() {
         println!("{}", e);
-        match e.get_root_error().downcast_ref::<std::io::Error>() {
+        match e.get_root_error().unwrap().downcast_ref::<std::io::Error>() {
             Some(e) => {
                 println!("this is an io error. {}", e);
+            }
+            None => {
+                println!("other")
+            }
+        }
+    }
+}
+
+#[derive(Error, Debug)]
+enum BizError {
+    #[error("{0}")]
+    Code(i32),
+}
+
+fn xxx2() -> Result<i32> {
+    let abc = BizError::Code(44);
+    let a = bail!(abc);
+
+    let msg1 = d!(@"aaa1");
+    let msg2 = d!(@"aaa2");
+    let msg3 = d!(@"aaa3");
+
+    a.c(msg1).c(msg2).c(msg3).c(d!("hello"))?;
+    Ok(0)
+}
+
+#[test]
+fn demo4() {
+    if let Err(e) = xxx2() {
+        println!("{}", e);
+        match e.get_root_error().unwrap().downcast_ref::<BizError>() {
+            Some(e) => {
+                println!("this is BizError {}", e);
             }
             None => {
                 println!("other")
