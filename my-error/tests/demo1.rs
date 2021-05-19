@@ -1,4 +1,4 @@
-use my_error::{bail, d, ge, pnk, se, MyResultTrait, Result};
+use my_error::{d, bail, ge, pnk, se, MyResultTrait, Result};
 use thiserror::Error;
 
 fn xxx() -> Result<i32> {
@@ -8,7 +8,7 @@ fn xxx() -> Result<i32> {
     let msg2 = d!(@"aaa2");
     let msg3 = d!(@"aaa3");
 
-    se!(a).c(msg1).c(msg2).c(msg3).c(d!("hello"))?;
+    a.c(msg1).c(msg2).c(msg3).c(d!("hello"))?;
     Ok(0)
 }
 
@@ -36,7 +36,7 @@ enum BizError {
 
 fn xxx2() -> Result<i32> {
     let abc = BizError::Code(44);
-    let a = bail!(abc);
+    let a = se!(Err(abc));
 
     let msg1 = d!(@"aaa1");
     let msg2 = d!(@"aaa2");

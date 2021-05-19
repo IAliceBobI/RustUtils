@@ -162,3 +162,52 @@ impl<T> MyResultTrait<T> for anyhow::Result<T> {
 		self.map_err(|e| { MyError::new(info, Some(e), None) })
 	}
 }
+
+macro_rules! impl_well_known_error_types {
+	($($e_type: ty),* $(,)*) => {
+		$(
+			impl<T> MyResultTrait<T> for std::result::Result<T, $e_type> {
+				fn c(self, info: ErrorInfo) -> Result<T> {
+					self.map_err(|e| { MyError::new(info, Some(anyhow::anyhow!(e)), None) })
+				}
+			}	
+		)*
+	};
+}
+
+impl_well_known_error_types!(
+	std::convert::Infallible,
+	std::env::VarError,
+	std::sync::mpsc::RecvTimeoutError,
+	std::sync::mpsc::TryRecvError,
+
+	std::alloc::LayoutError,
+	std::array::TryFromSliceError,
+	std::cell::BorrowError,
+	std::cell::BorrowMutError,
+	std::char::CharTryFromError,
+	std::char::DecodeUtf16Error,
+	std::char::ParseCharError,
+	std::env::JoinPathsError,
+	std::ffi::FromBytesWithNulError,
+	std::ffi::IntoStringError,
+	std::ffi::NulError,
+
+	std::io::Error, 
+	std::fmt::Error,
+
+	std::net::AddrParseError,
+	std::num::ParseFloatError,
+	std::num::ParseIntError,
+	std::num::TryFromIntError,
+	std::path::StripPrefixError,
+	std::str::ParseBoolError,
+
+	std::str::Utf8Error,
+	std::string::FromUtf8Error,
+	std::string::FromUtf16Error,
+	std::sync::mpsc::RecvError,
+	std::thread::AccessError,
+	std::time::SystemTimeError,
+);
+

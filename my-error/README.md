@@ -1,7 +1,7 @@
 # my-error
 
-Fork from `https://github.com/FindoraNetwork/RUC`,
-and depend on `anyhow`.
+Forked from `https://github.com/FindoraNetwork/RUC`,
+and depended on `anyhow`.
 
 ## Example
 
