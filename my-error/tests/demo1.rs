@@ -1,11 +1,3 @@
-# my-error
-
-Fork from `https://github.com/FindoraNetwork/RUC`,
-and depend on `anyhow`.
-
-## Example
-
-```rust
 use my_error::{bail, d, ge, pnk, se, MyResultTrait, Result};
 
 fn xxx() -> Result<i32> {
@@ -47,16 +39,3 @@ fn demo3() {
     let result: Result<i32> = Err(ge!("hello {} !!", 33));
     println!("{:?}", result);
 }
-
-```
-
-**Output:**
-
-```txt
-Error: hello At: my-error/tests/demo1.rs Line: 10 Column: 38
-Caused By: "aaa3" At: my-error/tests/demo1.rs Line: 8 Column: 16
- Caused By: "aaa2" At: my-error/tests/demo1.rs Line: 7 Column: 16
-   Caused By: "aaa1" At: my-error/tests/demo1.rs Line: 6 Column: 16
-     Caused By: Numerical argument out of domain (os error 33) At: _.rs Line: 0 Column: 0
-this is an io error. Numerical argument out of domain (os error 33)
-```
