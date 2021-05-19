@@ -1,6 +1,7 @@
 use lazy_static::lazy_static;
 use std::fmt::{Debug, Display};
 use std::sync::Mutex;
+pub use anyhow;
 
 #[macro_use]
 mod utils;
